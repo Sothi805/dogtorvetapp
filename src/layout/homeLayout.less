@@ -1,0 +1,29 @@
+    
+
+     @main-color: #007c7c;
+     @medium-shading: #777777;
+     @dark-shading: #5b5b5b;
+     @light-shading: #cdcdcd;
+    :root {
+        --sidebar-width: 15%;
+    }
+
+    #home-layout {
+        display: flex;
+        position: relative;
+        .side-navbar {
+            background-color:darken(@main-color, 10%);
+            height: 100vh;
+            position: fixed; // Changed from absolute to fixed
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            z-index: 1000;
+        }
+
+        .main-content {
+            flex-basis: 85%; // Adjust width accordingly
+            margin-left: var(--sidebar-width);
+            height: 200vh;
+        }
+    }
