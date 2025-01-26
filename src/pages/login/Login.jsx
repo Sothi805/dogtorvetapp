@@ -1,8 +1,8 @@
 import image1 from '../../assets/images/image1.png';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-import './login.less'
+import { useAuth } from '../../context/AuthContext';
+import './login.less';
 
 const Login = () => {
     useEffect(() => {
@@ -13,38 +13,27 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [errorMessage, setErrorMessage] = useState("");
     const [showPassword, setShowPassword] = useState(false);
-
+    const { login } = useAuth();
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        setErrorMessage(""); // Reset error message
+
+        if (!username || !password) {
+            setErrorMessage("Please enter your username & password.");
+            return;
+        }
+
         try {
-            const response = await axios.post("http://localhost:3500/users/login", {
-                username: username,
-                password: password,
-            }, { withCredentials: true });
-
-            const data = response.data;
-
-            if (response.status === 200) {
-                localStorage.setItem("authToken", data.token);
-                console.log("Login successful");
-                navigate("/home");
-            }
+            await login(username, password);
+            // Successful login handled by AuthContext, navigation happens there
         } catch (error) {
-            if (error.response) {
-                // Server responded with an error
-                console.error("Login failed:", error.response.data);
-                if (!username || !password) {
-                    setErrorMessage("Please enter your username & password.");
-                } else {
-                    setErrorMessage("Incorrect username or password, try again!");
-                }
-            } else {
-                // Network or other error
-                console.error("Error:", error.message);
-                setErrorMessage("Something went wrong. Please try again.");
-            }
+            console.error("Login error:", error);
+            setErrorMessage(
+                error.response?.data?.error ||
+                "Incorrect username or password, try again!"
+            );
         }
     };
 
@@ -70,10 +59,10 @@ const Login = () => {
                             value={username}
                             onChange={(e) => {
                                 setUsername(e.target.value);
-                                setErrorMessage(null); // Clear error message
+                                setErrorMessage("");
                             }}
                         />
-                        <div>
+                        <div className="password-container">
                             <input
                                 type={showPassword ? "text" : "password"}
                                 autoComplete="off"
@@ -83,13 +72,14 @@ const Login = () => {
                                 value={password}
                                 onChange={(e) => {
                                     setPassword(e.target.value);
-                                    setErrorMessage(null); // Clear error message
+                                    setErrorMessage("");
                                 }}
                             />
                             <button
                                 className="password-button"
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
+                                aria-label={showPassword ? "Hide password" : "Show password"}
                             >
                                 {showPassword ? "Hide" : "Show"}
                             </button>
@@ -97,9 +87,9 @@ const Login = () => {
                         <button type="submit">Sign In</button>
                     </form>
                     <p className="sign-up">
-                        Don't have an account? <span onClick={() => navigate("/")}>Sign-up</span>
+                        Don't have an account? <span onClick={() => navigate("/register")}>Sign-up</span>
                     </p>
-                    <p>This website was developed by @Veth Sothi</p>
+                    <p className="developer-credit">This website was developed by @Veth Sothi</p>
                 </div>
             </div>
         </div>
